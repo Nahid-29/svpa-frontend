@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "780675515278",
+    "project_id": "svpa-backend",
+    "storage_bucket": "svpa-backend.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:780675515278:android:6105abc8c825677c6e5adf",
+        "android_client_info": {
+          "package_name": "com.example.svpa_frontend"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "780675515278-95u8ce0srod29s9hcl33b6vm3eq8abbc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpg5dbJ_eD03qvtMPfaEvU_S0G6VYyqyc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "780675515278-95u8ce0srod29s9hcl33b6vm3eq8abbc.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "780675515278-8t6opm3eggjiol7373pd1n1bbddaqv8h.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.svpaFrontend"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:780675515278:android:078e8ebd11ab5ed46e5adf",
+        "android_client_info": {
+          "package_name": "com.example.svpaadmin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "780675515278-95u8ce0srod29s9hcl33b6vm3eq8abbc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpg5dbJ_eD03qvtMPfaEvU_S0G6VYyqyc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "780675515278-95u8ce0srod29s9hcl33b6vm3eq8abbc.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "780675515278-8t6opm3eggjiol7373pd1n1bbddaqv8h.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.svpaFrontend"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
