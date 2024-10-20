@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'ParkingSlotSelectionPage.dart'; // Import the ParkingSlotSelectPage
 
 class DashboardPage extends StatelessWidget {
   final String userId;  // Receive the userId from the login page
@@ -21,6 +22,20 @@ class DashboardPage extends StatelessWidget {
             Text(
               'Your User ID: $userId',  // Display the userId
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 40),
+
+            // Button to Navigate to ParkingSlotSelectPage
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ParkingSlotSelectPage(),
+                  ),
+                );
+              },
+              child: Text('Go to Parking Slot Selection'),
             ),
           ],
         ),
