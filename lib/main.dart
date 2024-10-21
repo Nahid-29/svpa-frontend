@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:svpa_frontend/map/find_location.dart';
 import 'package:svpa_frontend/pages/Dashboard/SlotOwnerDashboard.dart';
 import 'package:svpa_frontend/pages/Dashboard/UserDashboard.dart';
 import 'package:svpa_frontend/pages/LoginPage.dart';
@@ -31,7 +32,8 @@ class SmartVehicleParkingApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: LoginPage(),
+      // home: LoginPage(),
+      home: FindLocation(),
       routes: {
         '/login': (context) => LoginPage(),
         '/register-user': (context) => UserRegistrationPage(),

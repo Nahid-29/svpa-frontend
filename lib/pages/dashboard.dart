@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:svpa_frontend/map/find_location.dart';
 import 'ParkingSlotSelectionPage.dart'; // Import the ParkingSlotSelectPage
 
 class DashboardPage extends StatelessWidget {
@@ -32,6 +33,19 @@ class DashboardPage extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => ParkingSlotSelectPage(),
+                  ),
+                );
+              },
+              child: Text('Go to Parking Slot Selection'),
+            ),
+            SizedBox(height: 40),
+
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FindLocation(),
                   ),
                 );
               },
