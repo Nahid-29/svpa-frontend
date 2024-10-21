@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'paymentPage.dart';
-import '../Models/ParkingSlot.dart'; // Parking slot model
+import '../map/models/parking_data.dart';
 
 class ParkingSlotSelectPage extends StatefulWidget {
   @override
@@ -14,10 +14,12 @@ class _ParkingSlotSelectPageState extends State<ParkingSlotSelectPage> {
   TimeOfDay? startTime;
   TimeOfDay? endTime;
 
+  // Function to check if the selected slot is available
   bool isSlotAvailable() {
     return selectedSlot != null && !selectedSlot!.isOccupied;
   }
 
+  // Function to calculate the amount based on the selected slot and times
   double calculateAmount() {
     if (startTime != null && endTime != null && selectedSlot != null) {
       final double hours = (endTime!.hour + endTime!.minute / 60) -
@@ -27,6 +29,7 @@ class _ParkingSlotSelectPageState extends State<ParkingSlotSelectPage> {
     return 0;
   }
 
+  // Function to open time picker
   Future<void> selectTime(BuildContext context, bool isStartTime) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -46,7 +49,10 @@ class _ParkingSlotSelectPageState extends State<ParkingSlotSelectPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Select Parking Slot")),
+      appBar: AppBar(
+        title: Text("Select Parking Slot"),
+        centerTitle: true,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -76,10 +82,10 @@ class _ParkingSlotSelectPageState extends State<ParkingSlotSelectPage> {
               DropdownButton<String>(
                 hint: Text("Select Location"),
                 value: selectedLocation,
-                items: parkingData[selectedRegion]!.keys.map((location) {
+                items: parkingData[selectedRegion]!.map((location) {
                   return DropdownMenuItem(
-                    value: location,
-                    child: Text(location),
+                    value: location.locationName,
+                    child: Text(location.locationName),
                   );
                 }).toList(),
                 onChanged: (location) {
@@ -95,12 +101,15 @@ class _ParkingSlotSelectPageState extends State<ParkingSlotSelectPage> {
               DropdownButton<ParkingSlot>(
                 hint: Text("Select Slot"),
                 value: selectedSlot,
-                items: parkingData[selectedRegion]![selectedLocation]!
+                items: parkingData[selectedRegion]!
+                    .firstWhere((loc) => loc.locationName == selectedLocation)
+                    .parkingSlots
                     .map((slot) {
                   return DropdownMenuItem(
                     value: slot,
                     child: Text(
-                        "Slot ${slot.id} - ${slot.type} (\$${slot.price}/hour)"),
+                      "Slot ${slot.id} - ${slot.type} (\$${slot.price}/hour)",
+                    ),
                   );
                 }).toList(),
                 onChanged: (slot) {
@@ -117,9 +126,11 @@ class _ParkingSlotSelectPageState extends State<ParkingSlotSelectPage> {
                 Text("Start Time: "),
                 ElevatedButton(
                   onPressed: () => selectTime(context, true),
-                  child: Text(startTime != null
-                      ? startTime!.format(context)
-                      : "Select Start Time"),
+                  child: Text(
+                    startTime != null
+                        ? startTime!.format(context)
+                        : "Select Start Time",
+                  ),
                 ),
               ],
             ),
@@ -128,9 +139,11 @@ class _ParkingSlotSelectPageState extends State<ParkingSlotSelectPage> {
                 Text("End Time: "),
                 ElevatedButton(
                   onPressed: () => selectTime(context, false),
-                  child: Text(endTime != null
-                      ? endTime!.format(context)
-                      : "Select End Time"),
+                  child: Text(
+                    endTime != null
+                        ? endTime!.format(context)
+                        : "Select End Time",
+                  ),
                 ),
               ],
             ),

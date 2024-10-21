@@ -80,6 +80,9 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
 
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text("User registered successfully!")));
+
+        // Navigate to login page after successful registration
+        Navigator.of(context).pushReplacementNamed('/login');
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text("Error: ${e.toString()}")));
@@ -90,73 +93,219 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('User Registration')),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: EdgeInsets.all(16.0),
-          children: [
-            // Full Name, Email, Mobile Number
-            TextFormField(
-              controller: _fullNameController,
-              decoration: InputDecoration(labelText: 'Full Name'),
+      appBar: AppBar(
+        title: Text('User Registration'),
+        centerTitle: true,
+        backgroundColor: Colors.blueAccent,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Full Name
+                TextFormField(
+                  controller: _fullNameController,
+                  decoration: InputDecoration(
+                    labelText: 'Full Name',
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter your full name';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16.0),
+
+                // Email
+                TextFormField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                  validator: (value) {
+                    if (value!.isEmpty || !value.contains('@')) {
+                      return 'Please enter a valid email';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16.0),
+
+                // Mobile Number
+                TextFormField(
+                  controller: _mobileController,
+                  decoration: InputDecoration(
+                    labelText: 'Mobile Number',
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                  validator: (value) {
+                    if (value!.isEmpty || value.length < 10) {
+                      return 'Please enter a valid mobile number';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16.0),
+
+                // Vehicle Type Dropdown
+                DropdownButtonFormField<String>(
+                  decoration: InputDecoration(
+                    labelText: 'Vehicle Type',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: ['Car', 'Motorcycle'].map((type) {
+                    return DropdownMenuItem(value: type, child: Text(type));
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _vehicleType = value;
+                    });
+                  },
+                  validator: (value) {
+                    if (value == null) {
+                      return 'Please select a vehicle type';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16.0),
+
+                // Vehicle Details
+                TextFormField(
+                  controller: _vehicleCityController,
+                  decoration: InputDecoration(
+                    labelText: 'Vehicle City',
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter your vehicle\'s city';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16.0),
+
+                TextFormField(
+                  controller: _vehicleClassController,
+                  decoration: InputDecoration(
+                    labelText: 'Vehicle Class',
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter your vehicle\'s class';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16.0),
+
+                TextFormField(
+                  controller: _vehicleNoController,
+                  decoration: InputDecoration(
+                    labelText: 'Vehicle Number',
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter your vehicle number';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16.0),
+
+                // License Image Picker
+                ElevatedButton(
+                  onPressed: _pickImage,
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                    backgroundColor: Colors.blueAccent,
+                    textStyle: TextStyle(color: Colors.white),
+                  ),
+                  child: Text('Upload License Plate Image'),
+                ),
+                _licenseImage != null ? Image.file(_licenseImage!) : Container(),
+                SizedBox(height: 16.0),
+
+                // Password Fields
+                TextFormField(
+                  controller: _passwordController,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                  obscureText: true,
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter your password';
+                    } else if (value.length < 6) {
+                      return 'Password must be at least 6 characters';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16.0),
+
+                TextFormField(
+                  controller: _confirmPasswordController,
+                  decoration: InputDecoration(
+                    labelText: 'Confirm Password',
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                  obscureText: true,
+                  validator: (value) {
+                    if (value != _passwordController.text) {
+                      return 'Passwords do not match';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 20.0),
+
+                // Register Button
+                ElevatedButton(
+                  onPressed: _registerUser,
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                    backgroundColor: Colors.blueAccent,
+                    textStyle: TextStyle(color: Colors.white),
+                  ),
+                  child: Text('Register'),
+                ),
+                SizedBox(height: 16.0),
+
+                // Login Navigation
+                Center(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pushReplacementNamed('/login');
+                    },
+                    child: Text(
+                      'Already have an account? Login here',
+                      style: TextStyle(color: Colors.blueAccent),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-            ),
-            TextFormField(
-              controller: _mobileController,
-              decoration: InputDecoration(labelText: 'Mobile Number'),
-            ),
-            // Dropdowns for Vehicle Type and City
-            DropdownButtonFormField<String>(
-              decoration: InputDecoration(labelText: 'Vehicle Type'),
-              items: ['Car', 'Motorcycle'].map((type) {
-                return DropdownMenuItem(value: type, child: Text(type));
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _vehicleType = value;
-                });
-              },
-            ),
-            // Other fields for vehicle details
-            TextFormField(
-              controller: _vehicleCityController,
-              decoration: InputDecoration(labelText: 'Vehicle City'),
-            ),
-            TextFormField(
-              controller: _vehicleClassController,
-              decoration: InputDecoration(labelText: 'Vehicle Class'),
-            ),
-            TextFormField(
-              controller: _vehicleNoController,
-              decoration: InputDecoration(labelText: 'Vehicle Number'),
-            ),
-            // License Image Picker
-            ElevatedButton(
-              onPressed: _pickImage,
-              child: Text('Upload License Plate Image'),
-            ),
-            _licenseImage != null ? Image.file(_licenseImage!) : Container(),
-            // Password Fields
-            TextFormField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-            TextFormField(
-              controller: _confirmPasswordController,
-              decoration: InputDecoration(labelText: 'Confirm Password'),
-              obscureText: true,
-            ),
-            // Submit Button
-            ElevatedButton(
-              onPressed: _registerUser,
-              child: Text('Register'),
-            ),
-          ],
+          ),
         ),
       ),
     );

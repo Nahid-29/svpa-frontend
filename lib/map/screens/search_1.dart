@@ -2,22 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
-import '../models/parking_data.dart';  // Import the file where your data is defined
-
+import '../models/parking_data.dart'; // Import the file where your data is defined
 
 // Function to check and update parking slot statuses
 void checkParkingSlotStatus() {
   parkingData.forEach((region, locations) {
     for (var location in locations) {
       for (var slot in location.parkingSlots) {
-        slot.updateOccupiedStatus();  // Update the occupation status
+        slot.updateOccupiedStatus(); // Update the occupation status
       }
     }
   });
 }
 
 // Function to create markers from the parkingData
-Set<Marker> createParkingMarkers(Map<String, List<Location>> parkingData) {
+Set<Marker> createParkingMarkers(
+    Map<String, List<Location>> parkingData, Function(Location) onMarkerTap) {
   Set<Marker> parkingMarkers = {};
 
   parkingData.forEach((region, locations) {
@@ -35,8 +35,12 @@ Set<Marker> createParkingMarkers(Map<String, List<Location>> parkingData) {
           infoWindow: InfoWindow(
             title: location.locationName,
             snippet: _getAvailableSlotsText(location),
+            onTap: () {
+              onMarkerTap(location); // Call the provided callback on tap
+            },
           ),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue), // Customize marker icon color
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueBlue), // Customize marker icon color
         ),
       );
     }
@@ -47,53 +51,33 @@ Set<Marker> createParkingMarkers(Map<String, List<Location>> parkingData) {
 
 // Helper function to create the available parking slots text
 String _getAvailableSlotsText(Location location) {
-  int availableSlots = location.parkingSlots.where((slot) => !slot.isOccupied).length;
+  int availableSlots =
+      location.parkingSlots.where((slot) => !slot.isOccupied).length;
   return '$availableSlots available slots';
 }
 
-class Search_1 extends StatelessWidget {
+class Search_1 extends StatefulWidget {
+  @override
+  _Search_1State createState() => _Search_1State();
+}
+
+class _Search_1State extends State<Search_1> {
+  // Track if a marker has been tapped and store the relevant location
+  Location? selectedLocation;
+  bool isMapFullScreen = true;
+
+  // Function to handle when a marker is tapped
+  void _onMarkerTapped(Location location) {
+    setState(() {
+      selectedLocation = location;
+      isMapFullScreen = false; // Shrink the map to show parking slots
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // Changed to Provider<Position?> to allow null values
     final Position? currentPosition = Provider.of<Position?>(context);
-
-    // Hardcoded parking locations (latitude, longitude)
-    final List<LatLng> parkingLocations = [
-      LatLng(23.8457, 90.2589),  // Slot 1: ~100 meters
-      LatLng(23.8461, 90.2575),  // Slot 2: ~120 meters
-      LatLng(23.8452, 90.2594),  // Slot 3: ~130 meters
-      LatLng(23.8445, 90.2582),  // Slot 4: ~150 meters
-      LatLng(23.8450, 90.2569),  // Slot 5: ~160 meters
-      LatLng(23.8448, 90.2601),  // Slot 6: ~170 meters
-      LatLng(23.8463, 90.2590),  // Slot 7: ~180 meters
-      LatLng(23.8454, 90.2572),  // Slot 8: ~200 meters
-      LatLng(23.8465, 90.2557),  // Slot 9: ~210 meters
-      LatLng(23.8442, 90.2570),  // Slot 10: ~220 meters
-      LatLng(23.8439, 90.2592),  // Slot 11: ~230 meters
-      LatLng(23.8467, 90.2605),  // Slot 12: ~240 meters
-      LatLng(23.8443, 90.2551),  // Slot 13: ~250 meters
-      LatLng(23.8458, 90.2613),  // Slot 14: ~270 meters
-      LatLng(23.8440, 90.2618),  // Slot 15: ~290 meters
-
-      // Random suitable parking locations within a 5-km radius, spaced at appropriate distances:
-      LatLng(23.8460, 90.2610),  // Slot 16: ~350 meters
-      LatLng(23.8472, 90.2599),  // Slot 17: ~400 meters
-      LatLng(23.8447, 90.2645),  // Slot 18: ~500 meters
-      LatLng(23.8430, 90.2594),  // Slot 19: ~600 meters
-      LatLng(23.8500, 90.2550),  // Slot 20: ~700 meters
-      LatLng(23.8475, 90.2551),  // Slot 21: ~800 meters
-      LatLng(23.8525, 90.2605),  // Slot 22: ~1 km
-      LatLng(23.8550, 90.2617),  // Slot 23: ~1.2 km
-      LatLng(23.8600, 90.2570),  // Slot 24: ~1.5 km
-      LatLng(23.8700, 90.2500),  // Slot 25: ~2 km
-      LatLng(23.8750, 90.2550),  // Slot 26: ~2.2 km
-      LatLng(23.8850, 90.2650),  // Slot 27: ~2.5 km
-      LatLng(23.8888, 90.2555),  // Slot 28: ~3 km
-      LatLng(23.8900, 90.2490),  // Slot 29: ~3.5 km
-      LatLng(23.8950, 90.2400),  // Slot 30: ~4 km
-      LatLng(23.9000, 90.2300),  // Slot 31: ~4.5 km
-      LatLng(23.9050, 90.2200),  // Slot 32: ~5 km
-    ];
 
     // Access the parkingData list
     parkingData.forEach((region, locations) {
@@ -101,7 +85,8 @@ class Search_1 extends StatelessWidget {
       for (var location in locations) {
         print("Location: ${location.locationName}");
         for (var slot in location.parkingSlots) {
-          print("Slot ID: ${slot.id}, Type: ${slot.type}, Occupied: ${slot.isOccupied}");
+          print(
+              "Slot ID: ${slot.id}, Type: ${slot.type}, Occupied: ${slot.isOccupied}");
         }
       }
     });
@@ -109,40 +94,111 @@ class Search_1 extends StatelessWidget {
     // Example: Check and update parking slot statuses
     checkParkingSlotStatus();
 
-    // Create a list of markers for the hardcoded parking locations
-    // final Set<Marker> parkingMarkers = parkingLocations.map((location) {
-    //   return Marker(
-    //     markerId: MarkerId(location.toString()),
-    //     position: location,
-    //     infoWindow: InfoWindow(
-    //       title: 'Parking Location',
-    //       snippet: 'Available for parking',
-    //     ),
-    //     icon: BitmapDescriptor.defaultMarker,
-    //   );
-    // }).toSet();
-
-    Set<Marker> parkingMarkers = createParkingMarkers(parkingData);
+    Set<Marker> parkingMarkers = createParkingMarkers(parkingData, _onMarkerTapped);
 
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Parking Locations'),
+        centerTitle: true,
+        backgroundColor: Colors.blueAccent,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),  // Back symbol
+          onPressed: () {
+            Navigator.pop(context);  // Navigate back to the previous screen
+          },
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () {
+              // You can add search functionality here
+            },
+          ),
+        ],
+      ),
       body: (currentPosition != null)
           ? Column(
         children: <Widget>[
+          // Full-screen or half-screen map
           Container(
-            height: MediaQuery.of(context).size.height / 2,
+            height: isMapFullScreen
+                ? MediaQuery.of(context).size.height
+                : MediaQuery.of(context).size.height / 2,
             width: MediaQuery.of(context).size.width,
             child: GoogleMap(
               initialCameraPosition: CameraPosition(
-                target: LatLng(currentPosition.latitude, currentPosition.longitude),
+                target: LatLng(currentPosition.latitude,
+                    currentPosition.longitude),
                 zoom: 14.0,
               ),
               zoomGesturesEnabled: true,
-              markers: parkingMarkers, // Add the markers for the hardcoded locations
+              markers: parkingMarkers, // Add the markers for the locations
+              onMapCreated: (GoogleMapController controller) {},
+              onTap: (_) {
+                // When tapping on the map, reset to full screen (if needed)
+                setState(() {
+                  isMapFullScreen = true;
+                  selectedLocation = null;
+                });
+              },
             ),
           ),
+          // Display selected location and its slots
+          if (selectedLocation != null && !isMapFullScreen)
+            Expanded(
+              child: Container(
+                color: Colors.white,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        selectedLocation!.locationName,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blueAccent,
+                        ),
+                      ),
+                    ),
+                    ...selectedLocation!.parkingSlots.map((slot) {
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 5),
+                        elevation: 4,
+                        child: ListTile(
+                          title: Text(
+                            'Slot ${slot.id} (${slot.type})',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          subtitle: Text(
+                            slot.isOccupied
+                                ? 'Occupied'
+                                : 'Available',
+                            style: TextStyle(
+                              color: slot.isOccupied
+                                  ? Colors.red
+                                  : Colors.green,
+                            ),
+                          ),
+                          trailing: Text(
+                            'Price: \$${slot.price}',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ],
+                ),
+              ),
+            ),
         ],
       )
-          : Center(child: CircularProgressIndicator()), // Show loading indicator while fetching location
+          : Center(
+        child: CircularProgressIndicator(),
+      ), // Show loading indicator while fetching location
     );
   }
 }

@@ -33,7 +33,7 @@ class SmartVehicleParkingApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       // home: LoginPage(),
-      home: FindLocation(),
+      home: LoginPage(),
       routes: {
         '/login': (context) => LoginPage(),
         '/register-user': (context) => UserRegistrationPage(),
