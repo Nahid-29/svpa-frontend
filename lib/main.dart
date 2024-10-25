@@ -39,8 +39,6 @@ class SmartVehicleParkingApp extends StatelessWidget {
         '/register-user': (context) => UserRegistrationPage(),
         '/register-slot-owner': (context) => SlotOwnerRegistrationPage(),
         '/dashboard': (context) => DashboardPage(),
-        '/user-dashboard': (context) => UserDashboard(),
-        '/slot-owner-dashboard': (context) => SlotOwnerDashboard(),
       },
     );
   }

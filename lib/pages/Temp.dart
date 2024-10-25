@@ -5,8 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
-import 'package:svpa_frontend/pages/LoginPage.dart';
-
 class SlotOwnerRegistrationPage extends StatefulWidget {
   @override
   _SlotOwnerRegistrationPageState createState() => _SlotOwnerRegistrationPageState();
@@ -183,28 +181,6 @@ class _SlotOwnerRegistrationPageState extends State<SlotOwnerRegistrationPage> {
                     padding: EdgeInsets.symmetric(vertical: 14),
                   ),
                   child: Text('Register', style: TextStyle(fontSize: 18, color: Colors.white)),
-                ),
-              ),
-              SizedBox(height: 20),
-
-              // Register User Account Link
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => LoginPage(),
-                    ),
-                  );
-                },
-                child: Text(
-                  "Already have an account? Login here",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.blueAccent,
-                    fontSize: 16,
-                    decoration: TextDecoration.underline,
-                  ),
                 ),
               ),
             ],

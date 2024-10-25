@@ -76,6 +76,7 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
           'vehicleNo': _vehicleNoController.text,
           'licenseImage': imageUrl,
           'role': 'user',
+          'isVerified': false,
         });
 
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -96,7 +97,7 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
       appBar: AppBar(
         title: Text('User Registration'),
         centerTitle: true,
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Colors.teal,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -229,17 +230,37 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
                 ),
                 SizedBox(height: 16.0),
 
-                // License Image Picker
-                ElevatedButton(
-                  onPressed: _pickImage,
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-                    backgroundColor: Colors.blueAccent,
-                    textStyle: TextStyle(color: Colors.white),
-                  ),
-                  child: Text('Upload License Plate Image'),
+
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Column(
+                      children: [
+                        ElevatedButton(
+                          onPressed: _pickImage,
+                          child: Text('Upload License Plate'),
+                        ),
+                        SizedBox(height: 8),
+                        _licenseImage != null
+                            ? Image.file(_licenseImage!, width: 100, height: 100, fit: BoxFit.cover)
+                            : Container(width: 100, height: 100, color: Colors.grey[300]),
+                      ],
+                    ),
+                  ],
                 ),
-                _licenseImage != null ? Image.file(_licenseImage!) : Container(),
+
+                // // License Image Picker
+                // ElevatedButton(
+                //   onPressed: _pickImage,
+                //   style: ElevatedButton.styleFrom(
+                //     padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                //     backgroundColor: Colors.teal,
+                //     textStyle: TextStyle(color: Colors.white),
+                //   ),
+                //   child: Text('Upload License Plate Image'),
+                // ),
+                // _licenseImage != null ? Image.file(_licenseImage!) : Container(),
                 SizedBox(height: 16.0),
 
                 // Password Fields
@@ -279,12 +300,25 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
                 ),
                 SizedBox(height: 20.0),
 
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: ElevatedButton(
+                    onPressed: _registerUser,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      padding: EdgeInsets.symmetric(vertical: 14, horizontal: 14),
+                    ),
+                    child: Text('Register', style: TextStyle(fontSize: 18, color: Colors.white)),
+                  ),
+                ),
+                SizedBox(height: 20),
+
                 // Register Button
                 ElevatedButton(
                   onPressed: _registerUser,
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-                    backgroundColor: Colors.blueAccent,
+                    backgroundColor: Colors.teal,
                     textStyle: TextStyle(color: Colors.white),
                   ),
                   child: Text('Register'),
@@ -299,7 +333,7 @@ class _UserRegistrationPageState extends State<UserRegistrationPage> {
                     },
                     child: Text(
                       'Already have an account? Login here',
-                      style: TextStyle(color: Colors.blueAccent),
+                      style: TextStyle(color: Colors.teal),
                     ),
                   ),
                 ),
