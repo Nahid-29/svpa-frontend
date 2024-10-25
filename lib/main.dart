@@ -10,6 +10,12 @@ import 'registration_page.dart';
 import 'dashboard_page.dart';
 import 'pages/map_page.dart';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'pages/LoginPage.dart';
+import 'pages/Dashboard/UserDashboard.dart';
+import 'pages/Dashboard/SlotOwnerDashboard.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -33,7 +39,7 @@ class SmartVehicleParkingApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       // home: LoginPage(),
-      home: LoginPage(),
+      home: HomeScreen(),
       routes: {
         '/login': (context) => LoginPage(),
         '/register-user': (context) => UserRegistrationPage(),
@@ -44,17 +50,45 @@ class SmartVehicleParkingApp extends StatelessWidget {
   }
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
+class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Firebase Auth',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: LoginPage(),
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasData) {
+          // User is logged in
+          return FutureBuilder<DocumentSnapshot>(
+            future: FirebaseFirestore.instance
+                .collection('users') // or 'slotOwners' based on your collection names
+                .doc(snapshot.data!.uid)
+                .get(),
+            builder: (context, userSnapshot) {
+              if (userSnapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
+              if (userSnapshot.hasData && userSnapshot.data!.exists) {
+                // User exists, check their role
+                String role = userSnapshot.data!['role'];
+                if (role == 'slotOwner') {
+                  return SlotOwnerDashboard(uid: snapshot.data!.uid);
+                } else {
+                  return UserDashboardPage(userId: snapshot.data!.uid);
+                }
+              } else {
+                // User not found in Firestore
+                return LoginPage();
+              }
+            },
+          );
+        } else {
+          // User is not logged in
+          return LoginPage();
+        }
+      },
     );
   }
 }

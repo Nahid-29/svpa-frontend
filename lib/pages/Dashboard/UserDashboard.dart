@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:svpa_frontend/map/find_location.dart';
-// import 'ParkingSlotSelection_1.dart';
 import '../ParkingSlotSelection_1.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../LoginPage.dart';
 
 class UserDashboardPage extends StatefulWidget {
   final String userId;
@@ -39,6 +40,25 @@ class _DashboardPageState extends State<UserDashboardPage> {
       }
     } catch (e) {
       print("Error fetching user data: $e");
+    }
+  }
+
+  // Logout function
+  Future<void> _logout(BuildContext context) async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      // Optionally show a message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Logged out successfully!')),
+      );
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => LoginPage()),
+            (Route<dynamic> route) => false,
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Logout failed: ${e.toString()}')),
+      );
     }
   }
 
@@ -138,13 +158,11 @@ class _DashboardPageState extends State<UserDashboardPage> {
                 label: Text('Select Parking Slot'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueAccent,
-                  padding:
-                  EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  textStyle:
-                  TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                  textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                 ),
               ),
               SizedBox(height: 20),
@@ -163,30 +181,23 @@ class _DashboardPageState extends State<UserDashboardPage> {
                 label: Text('Find Parking Slot on Map'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
-                  padding:
-                  EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  textStyle:
-                  TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                  textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                 ),
               ),
               SizedBox(height: 40),
 
-              // Logout button or any other actions
+              // Logout button
               Align(
                 alignment: Alignment.bottomCenter,
                 child: TextButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Logout functionality here')),
-                    );
-                  },
+                  onPressed: () => _logout(context),
                   child: Text(
                     'Logout',
-                    style:
-                    TextStyle(color: Colors.redAccent, fontSize: 16),
+                    style: TextStyle(color: Colors.redAccent, fontSize: 16),
                   ),
                 ),
               ),
