@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 // Import the registration pages
-import 'user_registration_page.dart';
-import 'SlotOwnerRegistrationPage.dart';
+import 'Registration/user_registration_page.dart';
+import 'Registration/SlotOwnerRegistrationPage.dart';
 
 // Assuming these pages exist in your project
 import 'Dashboard/SlotOwnerDashboard.dart';

@@ -40,14 +40,14 @@ class ParkingSlot {
 }
 
 class Location {
-      // Unique location ID
+  final int locationId;     // Unique location ID
   final double latitude;    // Latitude of the location
   final double longitude;   // Longitude of the location
   final String locationName; // Location name (Mirpur, Gulshan, etc.)
   final List<ParkingSlot> parkingSlots; // List of parking slots at this location
 
   Location({
-
+    required this.locationId,
     required this.latitude,
     required this.longitude,
     required this.locationName,
@@ -69,7 +69,7 @@ class Region {
 Map<String, List<Location>> parkingData = {
   'Savar': [
     Location(
-
+      locationId: 1,
       latitude: 23.8286,
       longitude: 90.2792,
       locationName: 'Savar Location A',
@@ -86,68 +86,68 @@ Map<String, List<Location>> parkingData = {
       ],
     ),
     Location(
-
+      locationId: 2,
       latitude: 23.8295,
       longitude: 90.2801,
       locationName: 'Savar Location B',
       parkingSlots: [
-        ParkingSlot(id: 1, type: 'Car', price: 40),
-        ParkingSlot(id: 2, type: 'Motorcycle', price: 15),
+        ParkingSlot(id: 3, type: 'Car', price: 40),
+        ParkingSlot(id: 4, type: 'Motorcycle', price: 15),
       ],
     ),
   ],
   'Mirpur': [
     Location(
-
+      locationId: 3,
       latitude: 23.8040,
       longitude: 90.3671,
       locationName: 'Mirpur Location A',
       parkingSlots: [
         ParkingSlot(
-          id: 1,
+          id: 5,
           type: 'Car',
           price: 60,
           isOccupied: true,
           startTime: DateTime.now().subtract(Duration(hours: 3)),  // started 3 hours ago
           endTime: DateTime.now().subtract(Duration(minutes: 30)), // ended 30 mins ago
         ), // This slot will be automatically marked as not occupied
-        ParkingSlot(id: 2, type: 'Motorcycle', price: 25),
+        ParkingSlot(id: 6, type: 'Motorcycle', price: 25),
       ],
     ),
   ],
   'Banani': [
     Location(
-
+      locationId: 4,
       latitude: 23.7880,
       longitude: 90.4020,
       locationName: 'Banani Location A',
       parkingSlots: [
-        ParkingSlot(id: 1, type: 'Car', price: 70),
-        ParkingSlot(id: 2, type: 'Motorcycle', price: 30),
+        ParkingSlot(id: 7, type: 'Car', price: 70),
+        ParkingSlot(id: 8, type: 'Motorcycle', price: 30),
       ],
     ),
   ],
   'Bashundhara': [
     Location(
-
+      locationId: 5,
       latitude: 23.8151,
       longitude: 90.4280,
       locationName: 'Bashundhara Location A',
       parkingSlots: [
-        ParkingSlot(id: 1, type: 'Car', price: 80),
-        ParkingSlot(id: 2, type: 'Motorcycle', price: 35),
+        ParkingSlot(id: 9, type: 'Car', price: 80),
+        ParkingSlot(id: 10, type: 'Motorcycle', price: 35),
       ],
     ),
   ],
   'Gulshan': [
     Location(
-
+      locationId: 6,
       latitude: 23.7808,
       longitude: 90.4193,
       locationName: 'Gulshan Location A',
       parkingSlots: [
-        ParkingSlot(id: 1, type: 'Car', price: 100),
-        ParkingSlot(id: 2, type: 'Motorcycle', price: 50),
+        ParkingSlot(id: 11, type: 'Car', price: 100),
+        ParkingSlot(id: 12, type: 'Motorcycle', price: 50),
       ],
     ),
   ],

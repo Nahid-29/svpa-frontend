@@ -2,89 +2,217 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/parking_data.dart';
 
+class Search extends StatefulWidget {
+  @override
+  _SearchState createState() => _SearchState();
+}
 
+class _SearchState extends State<Search> {
+  Location? selectedLocation;
+  bool isMapFullScreen = true;
+  GoogleMapController? mapController; // Add map controller
 
-class Search extends StatelessWidget {
+  // Fetch Regions and Locations from Firestore
+  Future<Map<String, List<Location>>> fetchRegionsAndLocations() async {
+    Map<String, List<Location>> regionsData = {};
+
+    QuerySnapshot regionSnapshot =
+    await FirebaseFirestore.instance.collection('Regions').get();
+
+    for (var regionDoc in regionSnapshot.docs) {
+      String regionName = regionDoc.id;
+      List<Location> locations = [];
+
+      QuerySnapshot locationSnapshot = await regionDoc.reference
+          .collection('Locations')
+          .get();
+
+      for (var locationDoc in locationSnapshot.docs) {
+        var locationData = locationDoc.data() as Map<String, dynamic>;
+
+        // Parse parking slots if they exist in this location
+        List<ParkingSlot> parkingSlots = [];
+        QuerySnapshot slotSnapshot = await locationDoc.reference
+            .collection('ParkingSlots')
+            .get();
+
+        for (var slotDoc in slotSnapshot.docs) {
+          var slotData = slotDoc.data() as Map<String, dynamic>;
+          parkingSlots.add(ParkingSlot(
+            id: slotData['id'],
+            type: slotData['type'],
+            price: slotData['price'],
+            isOccupied: slotData['isOccupied'],
+          ));
+        }
+
+        locations.add(Location(
+
+          latitude: locationData['latitude'],
+          longitude: locationData['longitude'],
+          locationName: locationData['locationName'],
+          parkingSlots: parkingSlots,
+        ));
+      }
+      regionsData[regionName] = locations;
+    }
+
+    return regionsData;
+  }
+
+  // Handle marker taps
+  void _onMarkerTapped(Location location) {
+    setState(() {
+      selectedLocation = location;
+      isMapFullScreen = false;
+    });
+    // Animate camera to the selected location
+    mapController?.animateCamera(
+      CameraUpdate.newLatLngZoom(
+        LatLng(location.latitude, location.longitude),
+        16.0, // Adjust zoom level as desired
+      ),
+    );
+  }
+
+  // Create markers dynamically
+  Set<Marker> createParkingMarkers(Map<String, List<Location>> parkingData) {
+    Set<Marker> parkingMarkers = {};
+
+    parkingData.forEach((region, locations) {
+      for (var location in locations) {
+        parkingMarkers.add(
+          Marker(
+            markerId: MarkerId('location_${location.locationName}'),
+            position: LatLng(location.latitude, location.longitude),
+            infoWindow: InfoWindow(
+              title: location.locationName,
+              snippet: '${location.parkingSlots.where((slot) => !slot.isOccupied).length} available slots',
+              onTap: () {
+                _onMarkerTapped(location);
+              },
+            ),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+                BitmapDescriptor.hueBlue),
+          ),
+        );
+      }
+    });
+
+    return parkingMarkers;
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Changed to Provider<Position?> to allow null values
     final Position? currentPosition = Provider.of<Position?>(context);
 
-    // Hardcoded parking locations (latitude, longitude)
-    final List<LatLng> parkingLocations = [
-      LatLng(23.8457, 90.2589),  // Slot 1: ~100 meters
-      LatLng(23.8461, 90.2575),  // Slot 2: ~120 meters
-      LatLng(23.8452, 90.2594),  // Slot 3: ~130 meters
-      LatLng(23.8445, 90.2582),  // Slot 4: ~150 meters
-      LatLng(23.8450, 90.2569),  // Slot 5: ~160 meters
-      LatLng(23.8448, 90.2601),  // Slot 6: ~170 meters
-      LatLng(23.8463, 90.2590),  // Slot 7: ~180 meters
-      LatLng(23.8454, 90.2572),  // Slot 8: ~200 meters
-      LatLng(23.8465, 90.2557),  // Slot 9: ~210 meters
-      LatLng(23.8442, 90.2570),  // Slot 10: ~220 meters
-      LatLng(23.8439, 90.2592),  // Slot 11: ~230 meters
-      LatLng(23.8467, 90.2605),  // Slot 12: ~240 meters
-      LatLng(23.8443, 90.2551),  // Slot 13: ~250 meters
-      LatLng(23.8458, 90.2613),  // Slot 14: ~270 meters
-      LatLng(23.8440, 90.2618),  // Slot 15: ~290 meters
-
-      // Random suitable parking locations within a 5-km radius, spaced at appropriate distances:
-      LatLng(23.8460, 90.2610),  // Slot 16: ~350 meters
-      LatLng(23.8472, 90.2599),  // Slot 17: ~400 meters
-      LatLng(23.8447, 90.2645),  // Slot 18: ~500 meters
-      LatLng(23.8430, 90.2594),  // Slot 19: ~600 meters
-      LatLng(23.8500, 90.2550),  // Slot 20: ~700 meters
-      LatLng(23.8475, 90.2551),  // Slot 21: ~800 meters
-      LatLng(23.8525, 90.2605),  // Slot 22: ~1 km
-      LatLng(23.8550, 90.2617),  // Slot 23: ~1.2 km
-      LatLng(23.8600, 90.2570),  // Slot 24: ~1.5 km
-      LatLng(23.8700, 90.2500),  // Slot 25: ~2 km
-      LatLng(23.8750, 90.2550),  // Slot 26: ~2.2 km
-      LatLng(23.8850, 90.2650),  // Slot 27: ~2.5 km
-      LatLng(23.8888, 90.2555),  // Slot 28: ~3 km
-      LatLng(23.8900, 90.2490),  // Slot 29: ~3.5 km
-      LatLng(23.8950, 90.2400),  // Slot 30: ~4 km
-      LatLng(23.9000, 90.2300),  // Slot 31: ~4.5 km
-      LatLng(23.9050, 90.2200),  // Slot 32: ~5 km
-    ];
-
-
-
-    // Create a list of markers for the hardcoded parking locations
-    final Set<Marker> parkingMarkers = parkingLocations.map((location) {
-      return Marker(
-        markerId: MarkerId(location.toString()),
-        position: location,
-        infoWindow: InfoWindow(
-          title: 'Parking Location',
-          snippet: 'Available for parking',
-        ),
-        icon: BitmapDescriptor.defaultMarker,
-      );
-    }).toSet();
-
     return Scaffold(
-      body: (currentPosition != null)
-          ? Column(
-        children: <Widget>[
-          Container(
-            height: MediaQuery.of(context).size.height / 2,
-            width: MediaQuery.of(context).size.width,
-            child: GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: LatLng(currentPosition.latitude, currentPosition.longitude),
-                zoom: 14.0,
+      appBar: AppBar(
+        title: Text('Parking Locations'),
+        centerTitle: true,
+        backgroundColor: Colors.blueAccent,
+
+      ),
+      body: currentPosition != null
+          ? FutureBuilder<Map<String, List<Location>>>(
+        future: fetchRegionsAndLocations(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text("Error loading locations."));
+          }
+
+          var parkingData = snapshot.data!;
+          var parkingMarkers = createParkingMarkers(parkingData);
+
+          return Column(
+            children: <Widget>[
+              Container(
+                height: isMapFullScreen
+                    ? MediaQuery.of(context).size.height
+                    : MediaQuery.of(context).size.height / 2,
+                width: MediaQuery.of(context).size.width,
+                child: GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: LatLng(
+                      currentPosition.latitude,
+                      currentPosition.longitude,
+                    ),
+                    zoom: 14.0,
+                  ),
+                  markers: parkingMarkers,
+                  onMapCreated: (GoogleMapController controller) {
+                    mapController = controller; // Initialize map controller
+                  },
+                  onTap: (_) {
+                    setState(() {
+                      isMapFullScreen = true;
+                      selectedLocation = null;
+                    });
+                  },
+                ),
               ),
-              zoomGesturesEnabled: true,
-              markers: parkingMarkers, // Add the markers for the hardcoded locations
-            ),
-          ),
-        ],
+              if (selectedLocation != null && !isMapFullScreen)
+                Expanded(
+                  child: Container(
+                    color: Colors.white,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            selectedLocation!.locationName,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blueAccent,
+                            ),
+                          ),
+                        ),
+                        ...selectedLocation!.parkingSlots.map((slot) {
+                          return Card(
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 5),
+                            elevation: 4,
+                            child: ListTile(
+                              title: Text(
+                                'Slot ${slot.id} (${slot.type})',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                              subtitle: Text(
+                                slot.isOccupied ? 'Occupied' : 'Available',
+                                style: TextStyle(
+                                  color: slot.isOccupied
+                                      ? Colors.red
+                                      : Colors.green,
+                                ),
+                              ),
+                              trailing: Text(
+                                'Price: \$${slot.price}',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
       )
-          : Center(child: CircularProgressIndicator()), // Show loading indicator while fetching location
+          : Center(
+        child: CircularProgressIndicator(),
+      ),
     );
   }
 }
-
-

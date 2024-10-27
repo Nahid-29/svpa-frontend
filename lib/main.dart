@@ -3,22 +3,13 @@ import 'package:svpa_frontend/map/find_location.dart';
 import 'package:svpa_frontend/pages/Dashboard/SlotOwnerDashboard.dart';
 import 'package:svpa_frontend/pages/Dashboard/UserDashboard.dart';
 import 'package:svpa_frontend/pages/LoginPage.dart';
-import 'package:svpa_frontend/pages/SlotOwnerRegistrationPage.dart';
-import 'package:svpa_frontend/pages/user_registration_page.dart';
-import 'pages/LoginPage.dart';
-import 'registration_page.dart';
-import 'dashboard_page.dart';
-import 'pages/map_page.dart';
-
+import 'package:svpa_frontend/pages/Registration/SlotOwnerRegistrationPage.dart';
+import 'pages/Registration/user_registration_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'pages/LoginPage.dart';
-import 'pages/Dashboard/UserDashboard.dart';
-import 'pages/Dashboard/SlotOwnerDashboard.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'map/models/addParkingDataToFirestore.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,7 +17,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(SmartVehicleParkingApp());
-  // runApp(MyApp());
+  addParkingDataToFirestore();
 }
 
 class SmartVehicleParkingApp extends StatelessWidget {
@@ -38,13 +29,11 @@ class SmartVehicleParkingApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      // home: LoginPage(),
       home: HomeScreen(),
       routes: {
         '/login': (context) => LoginPage(),
         '/register-user': (context) => UserRegistrationPage(),
         '/register-slot-owner': (context) => SlotOwnerRegistrationPage(),
-        '/dashboard': (context) => DashboardPage(),
       },
     );
   }
@@ -63,7 +52,7 @@ class HomeScreen extends StatelessWidget {
           // User is logged in
           return FutureBuilder<DocumentSnapshot>(
             future: FirebaseFirestore.instance
-                .collection('users') // or 'slotOwners' based on your collection names
+                .collection('users') // Check in 'users' collection first
                 .doc(snapshot.data!.uid)
                 .get(),
             builder: (context, userSnapshot) {
@@ -71,7 +60,7 @@ class HomeScreen extends StatelessWidget {
                 return Center(child: CircularProgressIndicator());
               }
               if (userSnapshot.hasData && userSnapshot.data!.exists) {
-                // User exists, check their role
+                // User exists in 'users', check their role
                 String role = userSnapshot.data!['role'];
                 if (role == 'slotOwner') {
                   return SlotOwnerDashboard(uid: snapshot.data!.uid);
@@ -79,8 +68,25 @@ class HomeScreen extends StatelessWidget {
                   return UserDashboardPage(userId: snapshot.data!.uid);
                 }
               } else {
-                // User not found in Firestore
-                return LoginPage();
+                // If user is not found in 'users', check in 'slotOwners'
+                return FutureBuilder<DocumentSnapshot>(
+                  future: FirebaseFirestore.instance
+                      .collection('slotOwners')
+                      .doc(snapshot.data!.uid)
+                      .get(),
+                  builder: (context, slotOwnerSnapshot) {
+                    if (slotOwnerSnapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    if (slotOwnerSnapshot.hasData && slotOwnerSnapshot.data!.exists) {
+                      // User exists in 'slotOwners', return the SlotOwnerDashboard
+                      return SlotOwnerDashboard(uid: snapshot.data!.uid);
+                    } else {
+                      // User not found in either collection
+                      return LoginPage();
+                    }
+                  },
+                );
               }
             },
           );
